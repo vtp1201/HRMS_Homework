@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT || 27017;
-const dbName = process.env.DB_NAME || 'mini_spiderum';
+const dbName = process.env.DB_NAME || 'hrms';
 const uri = `mongodb://${dbHost}:${dbPort}/${dbName}`;
 
 async function connect() {
