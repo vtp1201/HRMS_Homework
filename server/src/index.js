@@ -15,6 +15,7 @@ const db = require('./config/db');
 
 require('./config/passport/passport');
 require('./config/passport/passportGoogle');
+require('./config/passport/passportLocal');
 
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));

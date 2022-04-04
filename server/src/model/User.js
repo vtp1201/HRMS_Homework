@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const User = new Schema(
     {
-        name: { type: Schema.Types.String, required: true, unique: true },
+        name: { type: Schema.Types.String, required: true},
         password: { type: Schema.Types.String },
         googleId: { type: Schema.Types.String },
         email: { type: Schema.Types.String },
@@ -16,5 +16,9 @@ const User = new Schema(
         timestamps: true,
     }
 )
+
+User.methods.validPassword = function(password) {
+    return bcrypt.compareSync(password, this.password);
+};
 
 module.exports = mongoose.model('User', User);
