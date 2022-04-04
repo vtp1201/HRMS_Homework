@@ -22,9 +22,4 @@ router.get('/google/callback',
     }
 );
 
-router.get('/hello', (req, res) => {
-    res.status(200);
-    res.json({msg: 'hello'})
-})
-
 module.exports = router

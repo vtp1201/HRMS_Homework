@@ -8,10 +8,10 @@ const Document = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
-        title: { type: Schema.Types.String, required: true},
+        title: { type: Schema.Types.String},
         category: { type: Schema.Types.String},
         description: { type: Schema.Types.String},
-        url: { type: Schema.Types.String, required: true},
+        url: { type: Schema.Types.String},
     },
     {
         timestamps: true,

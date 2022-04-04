@@ -17,6 +17,7 @@ const Confirm = new Schema(
         status: {
             type: Schema.Types.String,
             required: true,
+            default: 'Open',
         },
     },
     {

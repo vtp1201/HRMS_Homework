@@ -1,5 +1,7 @@
 const User = require('../model/User');
 
-module.exports = ()=>{
+class AuthController{
 
 }
+
+module.exports = new AuthController();
