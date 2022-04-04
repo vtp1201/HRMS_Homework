@@ -1,5 +1,6 @@
 const Document = require('../model/Document');
 const Confirm = require('../model/Confirm');
+const fs = require('fs');
 
 class documentController {
     // GET /documents?perPage=5&page=1 ( user )
@@ -95,6 +96,15 @@ class documentController {
                 msg: "Can't delete document, please try later",
             });
         }
+    }
+}
+
+function deleteFile(file) {
+    try {
+        fs.unlinkSync(file.name);
+        return true;
+    } catch (error) {
+        return false;
     }
 }
 
