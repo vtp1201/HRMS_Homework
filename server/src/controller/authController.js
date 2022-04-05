@@ -6,7 +6,7 @@ class AuthController{
     // GET /newAdmin
     async newAdmin (req, res) {
         try {
-            const pass = await bcrypt.hash('123456', 10);
+            const pass = await bcrypt.hash('admin', 10);
             const admin = new User({
                 name: 'admin',
                 isAdmin: true,

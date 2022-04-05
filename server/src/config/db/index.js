@@ -7,11 +7,11 @@ const uri = `mongodb://${dbHost}:${dbPort}/${dbName}`;
 
 async function connect() {
     try {
-        await mongoose.connect(uri);
+        await mongoose.connect('mongodb+srv://vtp1201:12012000@cluster0.akmfw.mongodb.net/hrms');
         console.log('connect success');
     } catch (err) {
         console.log('Failed to connect to mongo on startup - retrying in 5 sec');
-        setTimeout(connect(), 5000);
+        setTimeout(connect, 5000);
     }
 }
 
