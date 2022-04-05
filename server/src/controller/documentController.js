@@ -11,7 +11,7 @@ class documentController {
         try {
             const count = await Confirm.count();
             const confirm = await Confirm.find({
-                    user: req.user._id,
+                    userId: req.user._id,
                     deleted: false,
                 },{
                     _id : false,
@@ -59,7 +59,7 @@ class documentController {
             const listConfirm = await Confirm.insertMany(confirms);
             res.status(200);
             return res.json({
-                msg: "create sucess",
+                msg: "create success",
                 docIdId: result._id,
             });
         } catch (err) {
@@ -83,7 +83,7 @@ class documentController {
             if (result.matchedCount !== 1) {
                 res.status(400);
                 return res.json({
-                    msg: "document id does not exits",
+                    msg: "This document does not exist",
                 });
             }
             if (req.body.url){
@@ -96,7 +96,7 @@ class documentController {
             }
             res.status(200);
             return res.json({
-                msg: "update sucess",
+                msg: "update success",
             });
         } catch (err) {
             res.status(400);
@@ -115,7 +115,7 @@ class documentController {
             if (result.deletedCount !== 1) {
                 res.status(404);
                 return res.json({
-                    msg: 'document id wrong',
+                    msg: 'This document does not exist',
                 });
             }
             const deleteConfirm = await Confirm.delete({
@@ -123,7 +123,7 @@ class documentController {
             })
             res.status(200);
             return res.json({
-                status: 'success',
+                msg: 'success',
             });
         } catch (err) {
             res.status(400);

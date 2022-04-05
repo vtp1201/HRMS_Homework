@@ -23,7 +23,7 @@ class AuthController{
         }
     }
     // 
-    async genrateToken(req, res) {
+    async generateToken(req, res) {
         if(!req.user) return res.json({
             msg: 'cant login',
         })
