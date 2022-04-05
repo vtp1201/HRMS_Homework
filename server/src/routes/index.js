@@ -8,7 +8,7 @@ const confirmRoute = require('./confirm');
 const router = express.Router();
 
 router.use('/auth', authRoute);
-router.use('/documents', documentRoute);
+router.use('/document', documentRoute);
 router.use('/user', userRoute);
 router.use('/confirm', confirmRoute);
 

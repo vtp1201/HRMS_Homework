@@ -1,5 +1,6 @@
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
 
 class AuthController{
     // GET /newAdmin
@@ -23,7 +24,33 @@ class AuthController{
     }
     // 
     async genrateToken(req, res) {
+        if(!req.user) return res.json({
+            msg: 'cant login',
+        })
 
+        const jwtToken = jwt.sign(
+            { id: req.user.id},
+            process.env.JWT_SECRET || 'key'
+        );
+        res.status(200);
+        return res.json({ msg: "Welcome!", token: jwtToken });
+    }
+    // auth/logout
+    logOut (req, res) {
+        try {
+            req.logout();
+            res.status(200);
+            return res.json({
+                msg: 'sucess',
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(400);
+            return res.json({
+                msg: 'failue!',
+            });
+        }
+        
     }
 }
 

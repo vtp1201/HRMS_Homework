@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const passport = require("passport");
 
 const router = express.Router();
 
@@ -16,12 +17,11 @@ const upload = multer({ storage: storage });
 
 const documentController = require('../controller/documentController');
 
+router.all('*', passport.authenticate("jwt", { session: false }));
 router.get('/', documentController.getAllDocumentsByUser); // check
 router.post('/', upload.single('document'), documentController.createDocument); //(check)
 router.put('/:id', documentController.updateDocument); //check
 router.delete('/:id', documentController.deleteDocument);  // check
-
-
 
 
 module.exports = router;

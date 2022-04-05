@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const mongooseDelete = require('mongoose-delete');
 
 const Schema = mongoose.Schema;
 
@@ -10,7 +11,10 @@ const User = new Schema(
         googleId: { type: Schema.Types.String },
         email: { type: Schema.Types.String },
         image: { type: Schema.Types.String},
-        isAdmin: { type:Schema.Types.Boolean, required: true },
+        role: { 
+            type:Schema.Types.ObjectId, 
+            required: true
+        },
     },
     {
         timestamps: true,
@@ -20,5 +24,11 @@ const User = new Schema(
 User.methods.validPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 };
+
+User.plugin(mongooseDelete, {
+    deletedAt: true,
+    overrideMethods: 'all',
+});
+
 
 module.exports = mongoose.model('User', User);

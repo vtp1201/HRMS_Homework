@@ -1,6 +1,7 @@
 const Document = require('../model/Document');
 const Confirm = require('../model/Confirm');
 const fs = require('fs');
+const User = require('../model/User');
 
 class documentController {
     // GET /documents?perPage=5&page=1 ( user )
@@ -10,15 +11,17 @@ class documentController {
         try {
             const count = await Confirm.count();
             const confirm = await Confirm.find({
-                    user: req.query.userId
+                    user: req.user._id,
+                    deleted: false
                 },{
-                    _id: false,
-                    user: false,
+                    _id : false,
+                    document: true,
+                    status: true
                 })
                 //.find({user: req.user._id})
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
-                .populate('document');
+                .populate('document', ['title','url']);
             res.status(200);
             return res.json({
                 documents: confirm,
@@ -42,10 +45,19 @@ class documentController {
         });
         try {
             const result = await newDoc.save();
+            const users = await User.find({},{_id: true});
+            const confirms = users.map(user => {
+                return new Confirm({
+                    document: result._id,
+                    user: user._id,
+                    active: false,
+                })
+            })
+            const listConfirm = await Confirm.insertMany(confirms);
             res.status(200);
             return res.json({
                 msg: "create sucess",
-                docId: result._id,
+                documentId: result._id,
             });
         } catch (err) {
             console.log(err);
@@ -58,12 +70,26 @@ class documentController {
     // PUT /documents
     async updateDocument(req, res) {
         try {
-            const result = await Document.updateOne(req.body);
+            if (req.file.filename){
+                req.body.url = req.file.filename;
+            }
+            const result = await Document.updateOne({
+                    _id: req.params.id,
+                }, req.body);
+
             if (result.matchedCount !== 1) {
                 res.status(400);
                 return res.json({
-                    msg: "document id do not exits",
+                    msg: "document id does not exits",
                 });
+            }
+            if (req.body.url){
+                const updateConfirm = await Confirm.updateMany({
+                    document: req.params.id,
+                }, {
+                    status: 'Open',
+                })
+                console.log(updateConfirm);
             }
             res.status(200);
             return res.json({
@@ -79,13 +105,17 @@ class documentController {
     // DELETE /documents
     async deleteDocument(req, res) {
         try {
-            const result = await Document.deleteOne({_id: req.params.id});
+            const result = await Document.deleteOne({
+                _id: req.params.id
+            });
+
             if (result.deletedCount !== 1) {
                 res.status(400);
                 return res.json({
                     msg: 'document id wrong',
                 });
             }
+
             res.status(200);
             return res.json({
                 status: 'success',
