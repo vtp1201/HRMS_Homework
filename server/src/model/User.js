@@ -12,8 +12,9 @@ const User = new Schema(
         email: { type: Schema.Types.String },
         image: { type: Schema.Types.String},
         role: { 
-            type:Schema.Types.ObjectId, 
-            required: true
+            type:Schema.Types.Number, 
+            required: true,
+            default: 0 
         },
     },
     {
