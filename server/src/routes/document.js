@@ -16,12 +16,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const documentController = require('../controller/documentController');
+const {checkAdmin} = require('../middleware/authMiddleware');
 
 router.all('*', passport.authenticate("jwt", { session: false }));
 router.get('/', documentController.getAllDocumentsByUser); // check
-router.post('/', upload.single('document'), documentController.createDocument); //(check)
-router.put('/:id', documentController.updateDocument); //check
-router.delete('/:id', documentController.deleteDocument);  // check
-
+router.post('/', checkAdmin, upload.single('document'), documentController.createDocument); //(check)
+router.put('/:id', checkAdmin, upload.single('document'), documentController.updateDocument); //check
+router.delete('/:id', checkAdmin, documentController.deleteDocument);  // check
 
 module.exports = router;

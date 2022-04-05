@@ -12,16 +12,16 @@ class documentController {
             const count = await Confirm.count();
             const confirm = await Confirm.find({
                     user: req.user._id,
-                    deleted: false
+                    deleted: false,
                 },{
                     _id : false,
-                    document: true,
-                    status: true
+                    docId: true,
+                    status: true,
                 })
                 //.find({user: req.user._id})
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
-                .populate('document', ['title','url']);
+                .populate('docId', ['title','url']);
             res.status(200);
             return res.json({
                 documents: confirm,
@@ -37,19 +37,22 @@ class documentController {
     }
     // POST /documents
     async createDocument(req, res) {
+        if(!req.body.title) {
+            req.body.title = req.file.originalname;
+        }
         const newDoc = new Document({
             ...req.body,
             url: req.file.filename,
-            postedBy: req.body.userId,
-            //postedBy: req.user._id,
+            //postedBy: req.body.userId,
+            postedBy: req.user._id,
         });
         try {
             const result = await newDoc.save();
             const users = await User.find({},{_id: true});
             const confirms = users.map(user => {
                 return new Confirm({
-                    document: result._id,
-                    user: user._id,
+                    docId: result._id,
+                    userId: user._id,
                     active: false,
                 })
             })
@@ -57,7 +60,7 @@ class documentController {
             res.status(200);
             return res.json({
                 msg: "create sucess",
-                documentId: result._id,
+                docIdId: result._id,
             });
         } catch (err) {
             console.log(err);
@@ -85,7 +88,7 @@ class documentController {
             }
             if (req.body.url){
                 const updateConfirm = await Confirm.updateMany({
-                    document: req.params.id,
+                    docId: req.params.id,
                 }, {
                     status: 'Open',
                 })
@@ -102,20 +105,22 @@ class documentController {
             });
         }
     }
-    // DELETE /documents
+    // DELETE /documents/:id
     async deleteDocument(req, res) {
         try {
-            const result = await Document.deleteOne({
+            const result = await Document.delete({
                 _id: req.params.id
             });
 
             if (result.deletedCount !== 1) {
-                res.status(400);
+                res.status(404);
                 return res.json({
                     msg: 'document id wrong',
                 });
             }
-
+            const deleteConfirm = await Confirm.delete({
+                docId: req.params.id,
+            })
             res.status(200);
             return res.json({
                 status: 'success',

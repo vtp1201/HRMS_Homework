@@ -5,12 +5,12 @@ const Schema = mongoose.Schema;
 
 const Confirm = new Schema(
     {
-        user: {
+        userId: {
             type: Schema.Types.ObjectId,
             ref: 'User',
             required: true,
         },
-        document: {
+        docId: {
             type: Schema.Types.ObjectId,
             ref: 'Document',
             required: true,

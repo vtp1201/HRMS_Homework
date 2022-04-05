@@ -6,12 +6,12 @@ class confirmController{
     async getAllConfirmByIdDoc(req, res) {
         try {
             const allConfirm = await Confirm.find({ 
-                    document: req.params.id,
+                    docId: req.params.id,
                 },{    
                     _id : false, 
-                    document: false,
+                    docId: false,
                 })
-                .populate('user');
+                .populate('userId');
 
             res.status(200);
             return res.json(allConfirm); 
@@ -35,7 +35,7 @@ class confirmController{
                 });
             }
             users.forEach(e => {
-                e.document = docId;
+                e.docId = docId;
             });
             const result = await Confirm.insertMany(users);
             res.status(200);
@@ -53,8 +53,8 @@ class confirmController{
         try {
             const { userId, docId, status } = req.body;
             const result = await Confirm.updateOne({
-                user: userId,
-                document: docId,
+                userId: userId,
+                docId: docId,
             }, {
                 status: status,
             })
