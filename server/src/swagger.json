@@ -430,75 +430,93 @@
         ]
       }
     },
+    "/user/info": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "get info user by token",
+        "description": "/api/v1/user/info",
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Invalid username"
+          }
+        }
+      }
+    },
     "/user/all": {
       "get": {
         "tags": [
           "user"
         ],
         "summary": "get all user",
-        "description": "",
-        "operationId": "loginUser",
+        "description": "api/v1/user/all",
         "produces": [
-          "application/xml",
           "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "username",
-            "in": "query",
-            "description": "The user name for login",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "description": "The password for login in clear text",
-            "required": true,
-            "type": "string"
-          }
         ],
         "responses": {
           "200": {
-            "description": "successful operation",
             "schema": {
-              "type": "string"
-            },
-            "headers": {
-              "X-Rate-Limit": {
-                "type": "integer",
-                "format": "int32",
-                "description": "calls per hour allowed by the user"
-              },
-              "X-Expires-After": {
-                "type": "string",
-                "format": "date-time",
-                "description": "date in UTC when token expires"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
               }
             }
           },
           "400": {
-            "description": "Invalid username/password supplied"
+            "description": "Invalid users"
           }
         }
       }
     },
-    "/user/:docId?acive=true/false": {
+    "/user/:docId?perPage=5&page=1&active=true/false": {
       "get": {
         "tags": [
           "user"
         ],
         "summary": "Get all user by request and docId",
-        "description": "",
-        "operationId": "logoutUser",
+        "description": "api/v1/user/:docId?perPage=5&page=1&active=true/false",
         "produces": [
-          "application/xml",
           "application/json"
         ],
-        "parameters": [],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "docId":{
+                  "type": "string"
+                },
+                "users":{
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "userId":{
+                        "$ref": "#/definitions/User"
+                      },
+                      "status":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "current":{
+                  "type": "integer"
+                },
+                "pages":{
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "can't exec data"
           }
         }
       }
