@@ -16,13 +16,13 @@ passport.use(
         async (req, accessToken, refreshToken, profile, done) => {
             //console.log(profile)
             try {
-                const user = await User.findOne({googleId: profile.id})
+                const user = await User.findOne({socialId: profile.id})
                 if (!user) {
                     const ggUser = new User({
                         name: profile.displayName,
                         email: (profile.emails[0].value || '').toLowerCase(),
                         image: profile.photos[0].value,
-                        googleId: profile.id,
+                        socialId: profile.id,
                         isAdmin: false,
                     });
                     ggUser.save((err) => {

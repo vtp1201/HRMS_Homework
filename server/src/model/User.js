@@ -8,13 +8,13 @@ const User = new Schema(
     {
         name: { type: Schema.Types.String, required: true},
         password: { type: Schema.Types.String },
-        googleId: { type: Schema.Types.String },
+        socialId: { type: Schema.Types.String },
         email: { type: Schema.Types.String },
         image: { type: Schema.Types.String},
         role: { 
             type:Schema.Types.Number, 
             required: true,
-            default: 0 
+            default: 0,
         },
     },
     {

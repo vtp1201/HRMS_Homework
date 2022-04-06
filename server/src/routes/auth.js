@@ -12,7 +12,7 @@ const errorLoginUrl = "http://localhost:3000/login/error";
 
 router.post('/admin',
     passport.authenticate("local-login", {})
-    , authController.genrateToken
+    , authController.generateToken
 );
 
 router.get('/google', 
@@ -25,7 +25,7 @@ router.get('/google/callback',
         /* failureRedirect: errorLoginUrl,
         successRedirect: successLoginUrl, */
     })
-    , authController.genrateToken
+    , authController.generateToken
 );
 
 router.get('/logout', authController.logOut);

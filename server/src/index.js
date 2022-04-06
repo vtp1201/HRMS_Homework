@@ -4,7 +4,9 @@ const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const passport = require('passport');
-const session = require('express-session')
+const session = require('express-session');
+const swaggerUI = require("swagger-ui-express");
+const swaggerDocument = require('./swagger.json');
 
 require('dotenv').config();
 
@@ -40,6 +42,8 @@ db.connect();
 
 // router
 app.use('/api/v1', route);
+
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 // notFound
 app.use((req, res) => {
     res.status(404);

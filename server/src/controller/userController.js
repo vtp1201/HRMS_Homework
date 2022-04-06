@@ -52,6 +52,12 @@ class userController {
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
                 .populate('userId');
+            if (users.length === 0) {
+                res.status(404);
+                return res.json({
+                    msg: 'No user found',
+                });
+            }
             res.status(200);
             return res.json({
                 users: users,
