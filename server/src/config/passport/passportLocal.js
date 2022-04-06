@@ -6,7 +6,7 @@ const User = require('../../model/User');
 passport.use('local-login',
     new LocalStrategy(
         {
-            usernameField : 'name',
+            usernameField : 'username',
             passwordField : 'password',
             passReqToCallback : true 
         },

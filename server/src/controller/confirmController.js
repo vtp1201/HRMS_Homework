@@ -1,5 +1,6 @@
 const Document = require('../model/Document');
 const Confirm = require('../model/Confirm');
+const User = require('../model/User');
 
 class confirmController{
     // GET /confirm/:id (admin)
@@ -8,10 +9,10 @@ class confirmController{
             const allConfirm = await Confirm.find({ 
                     docId: req.params.id,
                 },{    
-                    _id : false, 
-                    docId: false,
+                    userId: true,
+                    status: true,
                 })
-                .populate('userId');
+                .populate('userId', ['name', 'image']);
 
             res.status(200);
             return res.json(allConfirm); 
@@ -30,20 +31,26 @@ class confirmController{
             const document = await Document.findById(docId);
             if (!document) {
                 res.status(400);
-                return req.json({
+                return res.json({
                     msg: "Document Id wrong, please try later!",
                 });
             }
-            users.forEach(e => {
-                e.docId = docId;
+            users.forEach(async e => {
+                await Confirm.findOneAndUpdate({
+                    userId: e.userId,
+                    docId: docId
+                }, {
+                    active: true,
+                })
             });
-            const result = await Confirm.insertMany(users);
             res.status(200);
-            return res.json(result);
+            return res.json({
+                msg: "success"
+            });
         } catch (error) {
             console.log(error);
             res.status(400);
-            return req.json({
+            return res.json({
                 msg: "Can't add confirm, please try later",
             });  
         }

@@ -6,9 +6,18 @@ module.exports = {
         if(user.role == 9 ) {
             return next();
         } 
-        res.status(401);
+        res.status(403);
         return res.json({
             msg: "Just admin can't exec"
         })
-    }
+    },
+    checkLogged: (req, res, next) => {
+        if (req.isAuthenticated()) {
+            res.status(401)
+            return res.json({
+                msg: "You are already logged in!"
+            });
+        }
+        next();
+    },
 }

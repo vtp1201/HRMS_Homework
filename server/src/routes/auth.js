@@ -5,29 +5,23 @@ const router = express.Router();
 
 const authController = require('../controller/authController');
 
-const successLoginUrl = "http://localhost:3000/login/success";
-const errorLoginUrl = "http://localhost:3000/login/error";
+const { checkLogged } = require('../middleware/authMiddleware');
 
 // router.get('/newAdmin', authController.newAdmin);
 
-router.post('/admin',
+router.post('/admin', checkLogged,
     passport.authenticate("local-login", {})
     , authController.generateToken
 );
 
-router.get('/google', 
-    passport.authenticate("google", { scope: ["profile", "email"]})
-);
+router.post('/loginGoogle', checkLogged,
+    authController.loginGoogle,
+    authController.generateToken
+)
 
-router.get('/google/callback',
-    passport.authenticate("google", {
-        failureMessage: "Cannot login to Google, please try again later!",
-        /* failureRedirect: errorLoginUrl,
-        successRedirect: successLoginUrl, */
-    })
-    , authController.generateToken
+router.get('/logout'
+    , passport.authenticate("jwt", { session: false })
+    , authController.logOut
 );
-
-router.get('/logout', authController.logOut);
 
 module.exports = router

@@ -4,14 +4,32 @@ const fs = require('fs');
 const User = require('../model/User');
 
 class documentController {
+    // GET /document/:id
+    async getDocumentByDocId(req, res) {
+        try {
+            const doc = await Document.findOne({ _id: req.params.id});
+            res.status(200);
+            return res.json(doc);
+        } catch (error) {
+            res.status(400);
+            return res.json({
+                msg: "Can't find document"
+            });
+        }
+    }
     // GET /documents?perPage=5&page=1 ( user )
     async getAllDocumentsByUser(req, res) {
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
         try {
-            const count = await Confirm.count();
+            const count = await Confirm.count({
+                userId: req.user._id,
+                active: true,
+                deleted: false,
+            });
             const confirm = await Confirm.find({
                     userId: req.user._id,
+                    active: true,
                     deleted: false,
                 },{
                     _id : false,
@@ -21,7 +39,14 @@ class documentController {
                 //.find({user: req.user._id})
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
-                .populate('docId', ['title','url']);
+                .populate('docId', ['title','url','updatedAt']);
+            if(confirm.length === 0) {
+                res.status(401);
+                return res.json({
+                    msg: "Bad query",
+                    pages: Math.ceil(count / perPage),
+            });
+            }
             res.status(200);
             return res.json({
                 documents: confirm,
@@ -37,13 +62,18 @@ class documentController {
     }
     // POST /documents
     async createDocument(req, res) {
-        console.log(req.file);
+        if(!req.file){
+            res.status(401);
+            return res.json({
+                msg: "import document file (pdf,doc,docx) first",
+            });
+        }
         if(!req.body.title) {
             req.body.title = req.file.originalname;
         }
         const newDoc = new Document({
             ...req.body,
-            url: req.file.filename,
+            url: `uploads\\${req.file.filename}`,
             //postedBy: req.body.userId,
             postedBy: req.user._id,
         });
@@ -51,11 +81,17 @@ class documentController {
             const result = await newDoc.save();
             const users = await User.find({},{_id: true});
             const confirms = users.map(user => {
+                if(user._id.equals(result.postedBy)) 
+                    return new Confirm({
+                        docId: result._id,
+                        userId: user._id,
+                        active: true,
+                    });
                 return new Confirm({
                     docId: result._id,
                     userId: user._id,
                     active: false,
-                })
+                });
             })
             const listConfirm = await Confirm.insertMany(confirms);
             res.status(200);
@@ -74,12 +110,12 @@ class documentController {
     // PUT /documents
     async updateDocument(req, res) {
         try {
-            if (req.file.filename){
-                req.body.url = req.file.filename;
+            if (req.file){
+                req.body.url = `uploads\\${req.file.filename}`;
             }
             const result = await Document.updateOne({
                     _id: req.params.id,
-                }, req.body);
+            }, req.body);
 
             if (result.matchedCount !== 1) {
                 res.status(400);
@@ -137,7 +173,7 @@ class documentController {
 
 function deleteFile(file) {
     try {
-        fs.unlinkSync(file.name);
+        fs.unlinkSync(`uploads\\${file.url}`);
         return true;
     } catch (error) {
         return false;
