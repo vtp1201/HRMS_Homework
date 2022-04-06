@@ -2,7 +2,7 @@ const User = require('../model/User');
 
 module.exports = {
     async checkAdmin(req, res, next) {
-        const user = await Role.findOne({ _id : req.user._id})
+        const user = await User.findOne({ _id : req.user._id});
         if(user.role == 9 ) {
             return next();
         } 

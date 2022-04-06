@@ -19,6 +19,7 @@ require('./config/passport/passportLocal');
 
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+console.log(path.join(__dirname, 'public'));
 
 app.use(helmet());
 app.use(express.json());

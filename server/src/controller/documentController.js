@@ -37,6 +37,7 @@ class documentController {
     }
     // POST /documents
     async createDocument(req, res) {
+        console.log(req.file);
         if(!req.body.title) {
             req.body.title = req.file.originalname;
         }

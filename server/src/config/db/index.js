@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const dbHost = process.env.DB_HOST || 'localhost';
 const dbPort = process.env.DB_PORT || 27017;
 const dbName = process.env.DB_NAME || 'hrms';
-const uri = `mongodb://${dbHost}:${dbPort}/${dbName}` || process.env.MONGO_URI;
+const uri = process.env.MONGO_URI ||`mongodb://${dbHost}:${dbPort}/${dbName}`;
 
 async function connect() {
     try {
