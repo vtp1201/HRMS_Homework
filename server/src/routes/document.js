@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     fileFilter: function (req, file, cb) {
+        console.log(file.originalname)
         const dot = path.extname(file.originalname);
         if (dot !== ".pdf" && dot !== ".doc" && dot !== ".docx") {
           return cb(null, false, new Error('just pdf, doc, docx'));
@@ -29,9 +30,13 @@ const documentController = require('../controller/documentController');
 const {checkAdmin} = require('../middleware/authMiddleware');
 
 router.all('*', passport.authenticate("jwt", { session: false }));
+router.get('/all', checkAdmin, documentController.getAllDocument);
+router.get('/:id', documentController.getDocumentByDocId);
 router.get('/', documentController.getAllDocumentsByUser); // check
 router.post('/', checkAdmin, upload.single('document'), documentController.createDocument); //(check)
 router.put('/:id', checkAdmin, upload.single('document'), documentController.updateDocument); //check
 router.delete('/:id', checkAdmin, documentController.deleteDocument);  // check
+router.patch('/:id/restore', checkAdmin, documentController.restoreDocument);
+router.delete('/:id/destroy', checkAdmin, documentController.deleteDocument);
 
 module.exports = router;

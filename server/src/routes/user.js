@@ -6,12 +6,9 @@ const router = express.Router();
 const userController = require('../controller/userController');
 const {checkAdmin} = require('../middleware/authMiddleware');
 
-router.all('*', passport.authenticate("jwt", { session: false }), checkAdmin);
-router.get('/info'
-    , passport.authenticate("jwt", { session: false })
-    , userController.getInfoUser
-);
-router.get('/all', userController.getAllUser); //check
-router.get('/sync/:id', userController.getUsersByIdDoc); // check
+router.all('*', passport.authenticate("jwt", { session: false }));
+router.get('/info', userController.getInfoUser);
+router.get('/all', checkAdmin, userController.getAllUser); //check
+router.get('/sync/:id', checkAdmin, userController.getUsersByIdDoc); // check
 
 module.exports = router;

@@ -58,9 +58,9 @@ class confirmController{
     // PUT /confirm/ (user)
     async updateStatusConfirm(req, res) {
         try {
-            const { userId, docId, status } = req.body;
+            const { docId, status } = req.body;
             const result = await Confirm.updateOne({
-                userId: userId,
+                userId: req.user._id,
                 docId: docId,
             }, {
                 status: status,

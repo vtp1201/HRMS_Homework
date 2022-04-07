@@ -58,7 +58,7 @@ class userController {
                 docId: req.params.id,
                 active: active,
             });
-            const users = await Confirm.find(
+            const confirms = await Confirm.find(
                 {
                     docId: req.params.id,
                     active: active,
@@ -71,12 +71,24 @@ class userController {
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
                 .populate('userId');
-            if (users.length === 0) {
+            if (confirms.length === 0) {
                 res.status(400);
                 return res.json({
                     msg: 'No user found',
                 });
             }
+            const users = []; 
+            confirms.forEach(user => {
+                if (user.userId.role == 0) {
+                    users.push({
+                        userId: user.userId._id,
+                        name: user.userId.name,
+                        image: user.userId.image,
+                        updateAt: user.userId.updateAt,
+                        status: user.status,
+                    })
+                }
+            });
             res.status(200);
             return res.json({
                 users: users,

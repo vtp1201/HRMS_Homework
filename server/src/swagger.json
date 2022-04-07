@@ -36,8 +36,7 @@
           "auth"
         ],
         "summary": "Login with username and password",
-        "description": "/api/vi/auth/admin",
-        "operationId": "addPet",
+        "description": "/api/v1/auth/admin",
         "consumes": [
           "application/json"
         ],
@@ -85,8 +84,7 @@
               "type":"object",
               "properties": {
                 "msg":{
-                  "type":"string",
-                  "value":"not"
+                  "type":"string"
                 }
               }
             }
@@ -100,7 +98,7 @@
           "auth"
         ],
         "summary": "Login by tokenId",
-        "description": "Multiple status values can be provided with comma separated strings",
+        "description": "api/v1/auth/loginGoogle",
         "operationId": "findPetsByStatus",
         "produces": [
           "application/json"
@@ -150,60 +148,64 @@
         }
       }
     },
-    "/auth/logout": {
+    "/document/all?perPage=5&page=1": {
       "get": {
         "tags": [
-          "auth"
+          "document"
         ],
-        "summary": "logout",
-        "description": "api/v1/auth/logout",
-        "operationId": "Logout",
-        "parameters": [
-          {
-            "name": "tags",
-            "in": "query",
-            "description": "Tags to filter by",
-            "required": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          }
+        "summary": "Returns all document by userId",
+        "description": "Returns a map of document",
+        "operationId": "getInventory",
+        "produces": [
+          "application/json"
         ],
+        "parameters": [],
+        "query":[],
         "responses": {
           "200": {
+            "description": "successful operation",
             "schema": {
               "type": "object",
               "properties": {
-                "msg":{
-                  "type":"string"
+                "documents": {
+                  "type": "array",
+                  "items":{
+                    "type":"object",
+                    "properties": {
+                      "docId": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      },
+                      "updateAt": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "current": {
+                  "type": "integer"
+                },
+                "pages": {
+                  "type": "integer"
                 }
               }
             }
-          },
-          "401": {
-            "schema": {
-              "type":"string"
-            }
-          },
+          }, 
           "400": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "msg":{
-                  "type":"string"
-                }
-              }
-            }
+            "description": "somethings went wrong"
           }
         },
         "security": [
           {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
+            "bearer Token": []
           }
         ]
       }
@@ -233,7 +235,16 @@
                     "type":"object",
                     "properties": {
                       "docId": {
-                        "type": "object"
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      },
+                      "updateAt": {
+                        "type": "string"
                       },
                       "status": {
                         "type": "string"
@@ -244,7 +255,7 @@
                 "current": {
                   "type": "integer"
                 },
-                "status": {
+                "pages": {
                   "type": "integer"
                 }
               }
@@ -279,6 +290,16 @@
             "description": "order placed for purchasing the pet",
             "required": true,
             "schema": {
+              "type": "object",
+              "properties":{
+                "document":{
+                  "type": "string",
+                  "description": "add file (pdf, doc, docx)"
+                },
+                "title":{
+                  "type": "string"
+                }
+              }
             }
           }
         ],
@@ -522,34 +543,97 @@
       }
     },
     "/confirm": {
-      "put": {
+      "post": {
         "tags": [
           "confirm"
         ],
-        "summary": "Update status confirm",
-        "description": "",
-        "operationId": "createUsersWithArrayInput",
+        "summary": "allow user read document",
+        "description": "/api/v1/confirm",
         "produces": [
-          "application/xml",
           "application/json"
         ],
         "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "List of user object",
             "required": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
+              "type":"object",
+              "properties": {
+                "docId":{
+                  "type":"string"
+                },
+                "users":{
+                  "type": "array",
+                  "items": {
+                    "type":"object",
+                    "properties":{
+                      "userId":{
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
               }
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": "successful operation"
+          "200": {
+            "schema":{
+              "type":"object",
+              "properties":{
+                "msg":{
+                  "type":"string"
+                }
+              }
+            },
+            "description": "successful"
+          },
+          "400": {
+            "schema":{
+              "type":"object",
+              "properties":{
+                "msg":{
+                  "type":"string"
+                }
+              }
+            },
+            "description": "failure"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "confirm"
+        ],
+        "summary": "Update status confirm",
+        "description": "/api/v1/confirm",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "docId and status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "docId":{
+                  "type": "string"
+                },
+                "status":{
+                  "type":"string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful"
           }
         }
       }

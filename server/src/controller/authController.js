@@ -9,20 +9,24 @@ class AuthController{
         try {
             const tokenId = req.body.tokenId;
             const profile = await googleOAuth.getProfileInfo(tokenId);
-            const user = await User.findOne({socialId: profile.id});
+            console.log(profile);
+            const user = await User.findOne({socialId: profile.sub});
             if(user) {
-                return next(user);
+                req.user = user;
+                console.log(req.user)
+                return next();
             }
             const ggUser = new User({
-                name: profile.displayName,
-                email: (profile.emails[0].value || '').toLowerCase(),
-                image: profile.photos[0].value,
-                socialId: profile.id,
+                name: `${profile.given_name} ${profile.family_name}`,
+                email: profile.email.toLowerCase(),
+                image: profile.picture,
+                socialId: profile.sub,
                 role: 0,
             });
-            console.log(profile)
+            
             const newUser = await ggUser.save();
-            return next(newUser);
+            req.user = newUser;
+            return next();
         } catch (error) {
             res.status(400);
             return res.json({
@@ -55,16 +59,17 @@ class AuthController{
             msg: 'cant login',
         })
 
-        const jwtToken = jwt.sign(
-            { id: req.user.id},
-            process.env.JWT_SECRET || 'key',
-            { expiresIn : '1d' }
+        const jwtToken = jwt.sign({
+             id: req.user.id
+        },process.env.JWT_SECRET || 'key', { 
+            expiresIn : '1d' 
+        }
         );
         res.status(200);
         return res.json({ 
             msg: "Welcome!", 
             username: req.user.name,
-            token: jwtToken 
+            token: jwtToken,
         });
     }
     // auth/logout

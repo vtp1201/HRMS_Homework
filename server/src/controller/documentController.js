@@ -13,11 +13,40 @@ class documentController {
         } catch (error) {
             res.status(400);
             return res.json({
-                msg: "Can't find document"
+                msg: "Can't find documen"
             });
         }
     }
-    // GET /documents?perPage=5&page=1 ( user )
+    // GET /document/all?perPage=5&page=1
+    async getAllDocument(req, res) {
+        const perPage = parseInt(req.query.perPage) || 10;
+        const page = parseInt(req.query.page) || 1;
+        try {
+            const count = await Document.count();
+            const documents = await Document.find()
+                .skip((perPage * page) - perPage)
+                .limit(perPage)
+            if(documents.length === 0) {
+                res.status(400);
+                return res.json({
+                    msg: "Bad query",
+                    pages: Math.ceil(count / perPage),
+                });
+            }
+            res.status(200);
+            return res.json({
+                documents: documents,
+                current: page,
+                pages: Math.ceil(count / perPage),
+            });
+        } catch (error) {
+            res.status(400);
+            return res.json({
+                msg: `can't find any doc`
+            });
+        }
+    }
+    // GET /document?perPage=5&page=1 ( user )
     async getAllDocumentsByUser(req, res) {
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
@@ -45,11 +74,20 @@ class documentController {
                 return res.json({
                     msg: "Bad query",
                     pages: Math.ceil(count / perPage),
-            });
+                });
             }
+            const docs = confirm.map(confirm => {
+                return {
+                    docId : confirm.docId._id,
+                    title: confirm.docId.title,
+                    url: confirm.docId.url,
+                    updatedAt: confirm.docId.updatedAt,
+                    status: confirm.status
+                }
+            })
             res.status(200);
             return res.json({
-                documents: confirm,
+                documents: docs,
                 current: page,
                 pages: Math.ceil(count / perPage),
             });
@@ -69,24 +107,18 @@ class documentController {
             });
         }
         if(!req.body.title) {
-            req.body.title = req.file.originalname;
+            req.body.title = req.file.originalname.split(".")[0];
         }
         const newDoc = new Document({
             ...req.body,
-            url: `uploads\\${req.file.filename}`,
+            url: `uploads/${req.file.filename}`,
             //postedBy: req.body.userId,
             postedBy: req.user._id,
         });
         try {
             const result = await newDoc.save();
-            const users = await User.find({},{_id: true});
+            const users = await User.find({role: 0},{_id: true});
             const confirms = users.map(user => {
-                if(user._id.equals(result.postedBy)) 
-                    return new Confirm({
-                        docId: result._id,
-                        userId: user._id,
-                        active: true,
-                    });
                 return new Confirm({
                     docId: result._id,
                     userId: user._id,
@@ -110,27 +142,27 @@ class documentController {
     // PUT /documents
     async updateDocument(req, res) {
         try {
-            if (req.file){
-                req.body.url = `uploads\\${req.file.filename}`;
-            }
-            const result = await Document.updateOne({
-                    _id: req.params.id,
-            }, req.body);
-
-            if (result.matchedCount !== 1) {
+            const doc = Document.findOne({_id: req.params.id});
+            if (!doc) {
                 res.status(400);
                 return res.json({
                     msg: "This document does not exist",
                 });
             }
-            if (req.body.url){
+            if (req.file){
+                req.body.url = `uploads/${req.file.filename}`;
+                const deleted = deleteFile(doc);
                 const updateConfirm = await Confirm.updateMany({
                     docId: req.params.id,
                 }, {
                     status: 'Open',
                 })
+                console.log(deleted);
                 console.log(updateConfirm);
             }
+            const result = await Document.updateOne({
+                    _id: req.params.id,
+            }, req.body);
             res.status(200);
             return res.json({
                 msg: "update success",
@@ -148,19 +180,19 @@ class documentController {
             const result = await Document.delete({
                 _id: req.params.id
             });
-
-            if (result.deletedCount !== 1) {
-                res.status(404);
+            if (result.modifiedCount !== 1) {
+                res.status(400);
                 return res.json({
                     msg: 'This document does not exist',
                 });
             }
             const deleteConfirm = await Confirm.delete({
                 docId: req.params.id,
-            })
+            });
             res.status(200);
             return res.json({
                 msg: 'success',
+                deletedConfirm : deleteConfirm.modifiedCount
             });
         } catch (err) {
             res.status(400);
@@ -169,13 +201,58 @@ class documentController {
             });
         }
     }
+    // PATCH /documents/:id/restore
+    async restoreDocument(req, res) {
+        try {
+            const result = await Document.restore({
+                _id: req.params.id
+            });
+            console.log(result);
+            const restoreConfirm = await Confirm.restore({
+                docId: req.params.id,
+            });
+            console.log(restoreConfirm);
+            res.status(200);
+            return res.json({
+                msg: 'success',
+            });
+        } catch (error) {
+            res.status(400);
+            return res.json({
+                msg: "Can't restore document, please try later",
+            });
+        }
+    }
+    // DELETE /documents/:id/destroy
+    async destroyDocument(req, res) {
+        try {
+            const result = await Document.deleteOne({
+                _id: req.params.id
+            });
+            console.log(result);
+            const deleteConfirm = await Confirm.deleteMany({
+                docId: req.params.id,
+            });
+            console.log(deleteConfirm);
+            res.status(200);
+            return res.json({
+                msg: 'success',
+            });
+        } catch (error) {
+            res.status(400);
+            return res.json({
+                msg: "Can't destroy document, please try later",
+            });
+        }
+    }
 }
 
 function deleteFile(file) {
     try {
-        fs.unlinkSync(`uploads\\${file.url}`);
+        fs.unlinkSync(`src/public/${file.url}`);
         return true;
     } catch (error) {
+        console.log(error)
         return false;
     }
 }

@@ -11,13 +11,17 @@ const client = new OAuth2Client(
   'postmessage'
 );
 
-exports.getProfileInfo = async (tokenId) => {
-  const ticket = await client.verifyIdToken({
-    tokenId,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
-
-  const payload = ticket.getPayload();
-
-  return payload;
+exports.getProfileInfo = async (idToken) => {
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+  
+    const payload = ticket.getPayload();
+  
+    return payload;
+  } catch (error) {
+    console.log(error)
+  }
 };

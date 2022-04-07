@@ -1,4 +1,5 @@
 const User = require('../model/User');
+const Confirm = require('../model/Confirm');
 
 module.exports = {
     async checkAdmin(req, res, next) {
@@ -11,7 +12,7 @@ module.exports = {
             msg: "Just admin can't exec"
         })
     },
-    checkLogged: (req, res, next) => {
+    checkLogged(req, res, next) {
         if (req.isAuthenticated()) {
             res.status(401)
             return res.json({
@@ -20,4 +21,17 @@ module.exports = {
         }
         next();
     },
+    async checkActive(req, res, next){
+        console.log(req.originalUrl);
+        const confirm = await Confirm.findOne({
+            userId : req.user._id,
+            url: req.originalUrl
+        })
+        if (confirm.active == true) 
+            return next();
+        res.status(401);
+        return res.json({
+            msg:"can't access this file",
+        });
+    }
 }
