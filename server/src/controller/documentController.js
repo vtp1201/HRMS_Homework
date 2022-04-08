@@ -13,7 +13,7 @@ class documentController {
         } catch (error) {
             res.status(400);
             return res.json({
-                msg: "Can't find documen"
+                msg: "Can't find document"
             });
         }
     }
@@ -26,6 +26,7 @@ class documentController {
             const documents = await Document.find()
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
+                .sort({ 'updateAt' : -1})
             if(documents.length === 0) {
                 res.status(400);
                 return res.json({
@@ -50,6 +51,7 @@ class documentController {
     async getAllDocumentsByUser(req, res) {
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
+        const sort = 'updateAt'
         try {
             const count = await Confirm.count({
                 userId: req.user._id,
@@ -59,15 +61,15 @@ class documentController {
             const confirm = await Confirm.find({
                     userId: req.user._id,
                     active: true,
-                    deleted: false,
                 },{
                     _id : false,
                     docId: true,
                     status: true,
                 })
-                //.find({user: req.user._id})
+                //.find({user: req.user._id}
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
+                .sort({ 'updateAt' : -1})
                 .populate('docId', ['title','url','updatedAt']);
             if(confirm.length === 0) {
                 res.status(401);
@@ -101,7 +103,7 @@ class documentController {
     // POST /documents
     async createDocument(req, res) {
         if(!req.file){
-            res.status(401);
+            res.status(400);
             return res.json({
                 msg: "import document file (pdf,doc,docx) first",
             });
@@ -129,7 +131,7 @@ class documentController {
             res.status(200);
             return res.json({
                 msg: "create success",
-                docIdId: result._id,
+                docId: result._id,
             });
         } catch (err) {
             console.log(err);
@@ -142,7 +144,7 @@ class documentController {
     // PUT /documents
     async updateDocument(req, res) {
         try {
-            const doc = Document.findOne({_id: req.params.id});
+            const doc = await Document.findOne({_id: req.params.id});
             if (!doc) {
                 res.status(400);
                 return res.json({
@@ -156,9 +158,7 @@ class documentController {
                     docId: req.params.id,
                 }, {
                     status: 'Open',
-                })
-                console.log(deleted);
-                console.log(updateConfirm);
+                });
             }
             const result = await Document.updateOne({
                     _id: req.params.id,
@@ -201,7 +201,39 @@ class documentController {
             });
         }
     }
-    // PATCH /documents/:id/restore
+
+    // GET / document/trash
+    async trashDocument(req, res) {
+        const perPage = parseInt(req.query.perPage) || 10;
+        const page = parseInt(req.query.page) || 1;
+        try {
+            const count = await Document.count({ deleted : true});
+            const documents = await Document.find({ deleted : true })
+                .skip((perPage * page) - perPage)
+                .limit(perPage)
+                .sort({ 'updateAt' : -1})
+            if(documents.length === 0) {
+                res.status(400);
+                return res.json({
+                    msg: "Bad query",
+                    pages: Math.ceil(count / perPage),
+                });
+            }
+            res.status(200);
+            return res.json({
+                documents: documents,
+                current: page,
+                pages: Math.ceil(count / perPage),
+            });
+        } catch (error) {
+            res.status(400);
+            return res.json({
+                msg: `can't find any doc`
+            });
+        }
+    }
+
+    // PATCH /document/:id/restore
     async restoreDocument(req, res) {
         try {
             const result = await Document.restore({

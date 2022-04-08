@@ -19,9 +19,4 @@ router.post('/loginGoogle', checkLogged,
     authController.generateToken
 )
 
-router.get('/logout'
-    , passport.authenticate("jwt", { session: false })
-    , authController.logOut
-);
-
 module.exports = router

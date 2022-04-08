@@ -9,13 +9,13 @@ class AuthController{
         try {
             const tokenId = req.body.tokenId;
             const profile = await googleOAuth.getProfileInfo(tokenId);
-            console.log(profile);
             const user = await User.findOne({socialId: profile.sub});
+
             if(user) {
                 req.user = user;
-                console.log(req.user)
                 return next();
             }
+            
             const ggUser = new User({
                 name: `${profile.given_name} ${profile.family_name}`,
                 email: profile.email.toLowerCase(),
@@ -71,23 +71,6 @@ class AuthController{
             username: req.user.name,
             token: jwtToken,
         });
-    }
-    // auth/logout
-    logOut (req, res) {
-        try {
-            req.logout();
-            res.status(200);
-            return res.json({
-                msg: 'sucess',
-            });
-        } catch (error) {
-            console.log(error);
-            res.status(400);
-            return res.json({
-                msg: 'failue!',
-            });
-        }
-        
     }
 }
 

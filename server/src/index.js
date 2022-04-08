@@ -21,10 +21,12 @@ require('./config/passport/passportLocal');
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(helmet());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(helmet());
+//bodyparse
+app.use(express.urlencoded( {extended: false} ));
+app.use(express.json());
+
 
 app.use(session({
     secret: 'key',

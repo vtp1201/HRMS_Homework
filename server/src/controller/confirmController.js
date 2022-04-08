@@ -59,6 +59,19 @@ class confirmController{
     async updateStatusConfirm(req, res) {
         try {
             const { docId, status } = req.body;
+            
+            // check confirm.status already Complete
+            const confirm = await Confirm.findOne({
+                docId: docId,
+                userId: req.user._id,
+            });
+            if (confirm?.status == "Complete") {
+                res.status(200);
+                return res.json({
+                    msg: "update success!",
+                });
+            }
+
             const result = await Confirm.updateOne({
                 userId: req.user._id,
                 docId: docId,
