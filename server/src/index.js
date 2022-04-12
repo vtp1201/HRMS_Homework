@@ -7,6 +7,7 @@ const passport = require('passport');
 const session = require('express-session');
 const swaggerUI = require("swagger-ui-express");
 const swaggerDocument = require('./swagger.json');
+const morgan = require('morgan')
 
 require('dotenv').config();
 
@@ -26,7 +27,7 @@ app.use(helmet());
 //bodyparse
 app.use(express.urlencoded( {extended: false} ));
 app.use(express.json());
-
+app.use(morgan('dev'))
 
 app.use(session({
     secret: 'key',

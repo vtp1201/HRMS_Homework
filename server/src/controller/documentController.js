@@ -19,14 +19,14 @@ class documentController {
     }
     // GET /document/all?perPage=5&page=1
     async getAllDocument(req, res) {
-        const perPage = parseInt(req.query.perPage) || 10;
-        const page = parseInt(req.query.page) || 1;
+        const perPage = Number(req.query.perPage) || 10;
+        const page = Number(req.query.page) || 1;
         try {
             const count = await Document.count();
             const documents = await Document.find()
-                .skip((perPage * page) - perPage)
                 .limit(perPage)
-                .sort({ 'updateAt' : -1})
+                .skip((perPage * page) - perPage)
+                .sort('-createdAt')
             if(documents.length === 0) {
                 res.status(400);
                 return res.json({

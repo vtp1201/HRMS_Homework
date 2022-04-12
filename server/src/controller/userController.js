@@ -50,14 +50,18 @@ class userController {
     }
     // GET /user/
     async getUsersByIdDoc(req, res) {
+        console.log(req)
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
-        const active = req.query.active || true
+        console.log(perPage, page)
+        const active = Boolean(req.query.active) || false
+        
         try {
             const count = await Confirm.count({
                 docId: req.params.id,
                 active: active,
             });
+            console.log(count)
             const confirms = await Confirm.find(
                 {
                     docId: req.params.id,

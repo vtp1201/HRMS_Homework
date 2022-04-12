@@ -9,6 +9,6 @@ const {checkAdmin} = require('../middleware/authMiddleware');
 router.all('*', passport.authenticate("jwt", { session: false }));
 router.get('/info', userController.getInfoUser);
 router.get('/all', checkAdmin, userController.getAllUser); //check
-router.get('/sync/:id', checkAdmin, userController.getUsersByIdDoc); // check
+router.get('/:id', checkAdmin, userController.getUsersByIdDoc); // check
 
 module.exports = router;
