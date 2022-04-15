@@ -50,23 +50,21 @@ class userController {
     }
     // GET /user/
     async getUsersByIdDoc(req, res) {
-        console.log(req)
-        const perPage = parseInt(req.query.perPage) || 10;
-        const page = parseInt(req.query.page) || 1;
-        console.log(perPage, page)
-        const active = Boolean(req.query.active) || false
-        
         try {
+            const perPage = parseInt(req.query.perPage) || 10;
+            const page = parseInt(req.query.page) || 1;
+            const active = false;
+            if(req.query.active) {
+                active = JSON.parse(req.query.active)
+            }
             const count = await Confirm.count({
                 docId: req.params.id,
                 active: active,
             });
-            console.log(count)
             const confirms = await Confirm.find(
                 {
                     docId: req.params.id,
                     active: active,
-                    deleted: false,
                 }, {
                     _id: false,
                     userId: true,
@@ -76,9 +74,9 @@ class userController {
                 .limit(perPage)
                 .populate('userId');
             if (confirms.length === 0) {
-                res.status(400);
+                res.status(200);
                 return res.json({
-                    msg: 'No user found',
+                    users: []
                 });
             }
             const users = []; 

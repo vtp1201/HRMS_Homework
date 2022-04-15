@@ -27,7 +27,7 @@ class confirmController{
     // POST /confirm/ (admin)
     async addRoleByIdDoc(req, res) {
         try {
-            const { docId , users } = req.body;
+            const { docId , users, active = true } = req.body;
             const document = await Document.findById(docId);
             if (!document) {
                 res.status(400);
@@ -40,7 +40,7 @@ class confirmController{
                     userId: e.userId,
                     docId: docId
                 }, {
-                    active: true,
+                    active: active,
                 })
             });
             res.status(200);

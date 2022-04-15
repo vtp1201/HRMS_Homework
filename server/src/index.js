@@ -19,8 +19,16 @@ const db = require('./config/db');
 require('./config/passport/passport');
 require('./config/passport/passportLocal');
 
+const {checkActive} = require('./middleware/authMiddleware');
+
 app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/file', express.static(path.join(__dirname, 'public')));
+// static file
+/* app.use('/file', passport.authenticate("jwt", { session: false }),
+        checkActive, 
+        express.static(path.join(__dirname, 'public'))
+); */
 
 app.use(cors());
 app.use(helmet());
@@ -50,9 +58,6 @@ app.use((req, res) => {
     res.status(404);
     res.json({msg: 'not found'});
 })
-const {checkActive} = require('./middleware/authMiddleware');
-
-app.all('/uploads/*', checkActive);
 
 const serverPort = process.env.SERVER_PORT || 5000;
 app.listen(serverPort, () => {

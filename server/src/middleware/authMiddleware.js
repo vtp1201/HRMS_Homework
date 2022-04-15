@@ -1,5 +1,6 @@
 const User = require('../model/User');
 const Confirm = require('../model/Confirm');
+const Document = require('../')
 
 module.exports = {
     async checkAdmin(req, res, next) {
@@ -23,15 +24,31 @@ module.exports = {
     },
     async checkActive(req, res, next){
         console.log(req.originalUrl);
-        const confirm = await Confirm.findOne({
-            userId : req.user._id,
-            url: req.originalUrl
-        })
-        if (confirm.active == true) 
-            return next();
-        res.status(401);
-        return res.json({
-            msg:"can't access this file",
-        });
+        try {
+            const user = await User.findOne({
+                _id: req.user._id
+            })
+            if (user.role === 9) {
+                return next();
+            }
+            const document = await Document.findOne({
+                url: req.originalUrl.slice(1)
+            }) 
+            const confirm = await Confirm.findOne({
+                userId : req.user._id,
+                docId: document._id
+            })
+            if (confirm.active === true) 
+                return next();
+            res.status(401);
+            return res.json({
+                msg:"can't access this file",
+            });
+        } catch (error) {
+            res.status(401);
+            return res.json({
+                msg:"can't access this file",
+            });
+        }
     }
 }

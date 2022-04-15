@@ -51,7 +51,7 @@ class documentController {
     async getAllDocumentsByUser(req, res) {
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
-        const sort = 'updateAt'
+        const sort = 'updatedAt';
         try {
             const count = await Confirm.count({
                 userId: req.user._id,
@@ -69,12 +69,11 @@ class documentController {
                 //.find({user: req.user._id}
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
-                .sort({ 'updateAt' : -1})
+                .sort(sort)
                 .populate('docId', ['title','url','updatedAt']);
             if(confirm.length === 0) {
-                res.status(401);
                 return res.json({
-                    msg: "Bad query",
+                    msg: "User dont have any document to confirm",
                     pages: Math.ceil(count / perPage),
                 });
             }
@@ -113,7 +112,7 @@ class documentController {
         }
         const newDoc = new Document({
             ...req.body,
-            url: `uploads/${req.file.filename}`,
+            url: `file/uploads/${req.file.filename}`,
             //postedBy: req.body.userId,
             postedBy: req.user._id,
         });
@@ -152,7 +151,10 @@ class documentController {
                 });
             }
             if (req.file){
-                req.body.url = `uploads/${req.file.filename}`;
+                if(!req.body.title) {
+                    req.body.title = req.file.originalname.split(".")[0];
+                }
+                req.body.url = `file/uploads/${req.file.filename}`;
                 const deleted = deleteFile(doc);
                 const updateConfirm = await Confirm.updateMany({
                     docId: req.params.id,
@@ -281,6 +283,7 @@ class documentController {
 
 function deleteFile(file) {
     try {
+        file.url = file.url.split("file/")[1];
         fs.unlinkSync(`src/public/${file.url}`);
         return true;
     } catch (error) {
