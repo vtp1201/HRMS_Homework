@@ -30,8 +30,8 @@ const {checkAdmin} = require('../middleware/authMiddleware');
 
 router.all('*', passport.authenticate("jwt", { session: false }));
 router.get('/all', checkAdmin, documentController.getAllDocument);
-router.get('/:id', documentController.getDocumentByDocId);
 router.get('/trash', checkAdmin, documentController.trashDocument);
+router.get('/:id', documentController.getDocumentByDocId);
 router.get('/', documentController.getAllDocumentsByUser); // check
 router.post('/', checkAdmin, upload.single('file'), documentController.createDocument); //(check)
 router.put('/:id', checkAdmin, upload.single('file'), documentController.updateDocument); //check

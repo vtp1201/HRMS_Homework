@@ -23,14 +23,15 @@ const {checkActive} = require('./middleware/authMiddleware');
 
 app.use(methodOverride('_method'));
 
-app.use('/file', express.static(path.join(__dirname, 'public')));
+app.use(cors());
+//app.use('/file', express.static(path.join(__dirname, 'public')));
 // static file
-/* app.use('/file', passport.authenticate("jwt", { session: false }),
+app.use('/file', passport.authenticate("jwt", { session: false }),
         checkActive, 
         express.static(path.join(__dirname, 'public'))
-); */
+);
 
-app.use(cors());
+
 app.use(helmet());
 //bodyparse
 app.use(express.urlencoded( {extended: false} ));

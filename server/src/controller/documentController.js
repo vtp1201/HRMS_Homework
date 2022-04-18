@@ -22,11 +22,13 @@ class documentController {
         const perPage = Number(req.query.perPage) || 10;
         const page = Number(req.query.page) || 1;
         try {
-            const count = await Document.count();
-            const documents = await Document.find()
-                .limit(perPage)
-                .skip((perPage * page) - perPage)
-                .sort('-createdAt')
+            const [count, documents] = await Promise.all([
+                Document.count(),
+                Document.find()
+                    .limit(perPage)
+                    .skip((perPage * page) - perPage)
+                    .sort('-createdAt')
+            ]);
             if(documents.length === 0) {
                 res.status(400);
                 return res.json({
@@ -53,12 +55,12 @@ class documentController {
         const page = parseInt(req.query.page) || 1;
         const sort = 'updatedAt';
         try {
-            const count = await Confirm.count({
-                userId: req.user._id,
-                active: true,
-                deleted: false,
-            });
-            const confirm = await Confirm.find({
+            const [count, confirm] = await Promise.all([
+                Confirm.count({
+                    userId: req.user._id,
+                    active: true,
+                }),
+                Confirm.find({
                     userId: req.user._id,
                     active: true,
                 },{
@@ -66,11 +68,11 @@ class documentController {
                     docId: true,
                     status: true,
                 })
-                //.find({user: req.user._id}
                 .skip((perPage * page) - perPage)
                 .limit(perPage)
                 .sort(sort)
-                .populate('docId', ['title','url','updatedAt']);
+                .populate('docId', ['title','url','updatedAt'])
+            ]);
             if(confirm.length === 0) {
                 return res.json({
                     msg: "User dont have any document to confirm",
@@ -113,7 +115,6 @@ class documentController {
         const newDoc = new Document({
             ...req.body,
             url: `file/uploads/${req.file.filename}`,
-            //postedBy: req.body.userId,
             postedBy: req.user._id,
         });
         try {
@@ -209,11 +210,13 @@ class documentController {
         const perPage = parseInt(req.query.perPage) || 10;
         const page = parseInt(req.query.page) || 1;
         try {
-            const count = await Document.count({ deleted : true});
-            const documents = await Document.find({ deleted : true })
-                .skip((perPage * page) - perPage)
-                .limit(perPage)
-                .sort({ 'updateAt' : -1})
+            const [count, documents] = await Promise.all([
+                Document.countDeleted(),
+                Document.findDeleted()
+                    .skip((perPage * page) - perPage)
+                    .limit(perPage)
+                    .sort({ 'updateAt' : -1})
+            ]);
             if(documents.length === 0) {
                 res.status(400);
                 return res.json({
@@ -228,6 +231,7 @@ class documentController {
                 pages: Math.ceil(count / perPage),
             });
         } catch (error) {
+            console.log(error)
             res.status(400);
             return res.json({
                 msg: `can't find any doc`

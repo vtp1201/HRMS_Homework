@@ -285,27 +285,22 @@
         ]
       }
     },
-    "/document/:docId": {
+    "/document/{id}": {
       "get": {
         "tags": [
           "document"
         ],
         "summary": "Get info document by ID",
-        "description": "",
-        "operationId": "getOrderById",
+        "description": "api/v1/document/:id",
         "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "name": "orderId",
+            "name": "id",
             "in": "path",
-            "description": "ID of pet that needs to be fetched",
             "required": true,
-            "type": "integer",
-            "maximum": 10,
-            "minimum": 1,
-            "format": "int64"
+            "type": "string"
           }
         ],
         "responses": {
@@ -330,21 +325,16 @@
           "document"
         ],
         "summary": "Update document by ID",
-        "description": "",
-        "operationId": "getOrderById",
+        "description": "api/v1/document/:id",
         "produces": [
           "application/json"
         ],
         "parameters": [
           {
-            "name": "orderId",
+            "name": "id",
             "in": "path",
-            "description": "ID of pet that needs to be fetched",
             "required": true,
-            "type": "integer",
-            "maximum": 10,
-            "minimum": 1,
-            "format": "int64"
+            "type": "string"
           }
         ],
         "responses": {
@@ -369,16 +359,12 @@
           "document"
         ],
         "summary": "Delete document",
-        "description": "api/v1/document/:id",
         "parameters": [
           {
-            "name": "orderId",
+            "name": "id",
             "in": "path",
-            "description": "ID of the order that needs to be deleted",
             "required": true,
-            "type": "integer",
-            "minimum": 1,
-            "format": "int64"
+            "type": "string"
           }
         ],
         "responses": {
@@ -406,6 +392,18 @@
         ],
         "summary": "get document deleted",
         "description": "/api/v1/document/trash",
+        "parameters": [
+          {
+            "name": "perPage",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -424,13 +422,21 @@
         ]
       }
     },
-    "/document/:id/restore": {
+    "/document/{id}/restore": {
       "patch": {
         "tags": [
           "document"
         ],
         "summary": "restore document",
         "description": "/api/v1/document/:id/restore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -503,49 +509,42 @@
         ]
       }
     },
-    "/user/:docId?perPage=5&page=1&active=true/false": {
+    "/user/{id}?perPage=5&page=1&active=true/false": {
       "get": {
         "tags": [
           "user"
         ],
         "summary": "Get all user by request and docId",
         "description": "api/v1/user/:docId?perPage=5&page=1&active=true/false",
-        "produces": [
-          "application/json"
+        "parameters": [
+          {
+            "name" : "perPage",
+            "in" : "query",
+            "type":"string"
+          },
+          {
+            "name" : "page",
+            "in" : "query",
+            "type":"string"
+          },
+          {
+            "name" : "active",
+            "in" : "query",
+            "type":"string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
         ],
         "responses": {
           "200": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "docId":{
-                  "type": "string"
-                },
-                "users":{
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "userId":{
-                        "$ref": "#/definitions/User"
-                      },
-                      "status":{
-                        "type": "string"
-                      }
-                    }
-                  }
-                },
-                "current":{
-                  "type": "integer"
-                },
-                "pages":{
-                  "type": "integer"
-                }
-              }
-            }
+            "description": "OK"
           },
-          "400": {
-            "description": "can't exec data"
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
@@ -567,25 +566,21 @@
         ],
         "parameters": [
           {
-            "in": "body",
             "name": "body",
-            "required": true,
+            "in": "body",
             "schema": {
-              "type":"object",
+              "type": "object",
               "properties": {
-                "docId":{
-                  "type":"string"
+                "docId": {
+                  "example": "any"
                 },
-                "users":{
+                "users": {
                   "type": "array",
-                  "items": {
-                    "type":"object",
-                    "properties":{
-                      "userId":{
-                        "type": "string"
-                      }
-                    }
-                  }
+                  "example": "array"
+                },
+                "active": {
+                  "type":"boolean",
+                  "example": "true"
                 }
               }
             }

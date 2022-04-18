@@ -23,12 +23,8 @@ module.exports = {
         next();
     },
     async checkActive(req, res, next){
-        console.log(req.originalUrl);
         try {
-            const user = await User.findOne({
-                _id: req.user._id
-            })
-            if (user.role === 9) {
+            if (req.user.role === 9) {
                 return next();
             }
             const document = await Document.findOne({

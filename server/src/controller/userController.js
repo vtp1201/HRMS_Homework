@@ -53,26 +53,35 @@ class userController {
         try {
             const perPage = parseInt(req.query.perPage) || 10;
             const page = parseInt(req.query.page) || 1;
-            const active = false;
+            let active = false;
             if(req.query.active) {
-                active = JSON.parse(req.query.active)
+                if (req.query.active == 'all') {
+                    active = [true, false];
+                }
+                else {
+                    active = JSON.parse(req.query.active)
+                }
             }
-            const count = await Confirm.count({
-                docId: req.params.id,
-                active: active,
-            });
-            const confirms = await Confirm.find(
-                {
+
+            const [count, confirms] = await Promise.all([
+                Confirm.count({
                     docId: req.params.id,
                     active: active,
-                }, {
-                    _id: false,
-                    userId: true,
-                    status: true,
-                })
-                .skip((perPage * page) - perPage)
-                .limit(perPage)
-                .populate('userId');
+                }),
+                Confirm.find(
+                    {
+                        docId: req.params.id,
+                        active: {$in : active},
+                    }, {
+                        _id: false,
+                        userId: true,
+                        status: true,
+                        active: true,
+                    })
+                    .skip((perPage * page) - perPage)
+                    .limit(perPage)
+                    .populate('userId')
+            ])
             if (confirms.length === 0) {
                 res.status(200);
                 return res.json({
@@ -81,15 +90,14 @@ class userController {
             }
             const users = []; 
             confirms.forEach(user => {
-                if (user.userId.role == 0) {
-                    users.push({
-                        userId: user.userId._id,
-                        name: user.userId.name,
-                        image: user.userId.image,
-                        updateAt: user.userId.updateAt,
-                        status: user.status,
-                    })
-                }
+                users.push({
+                    userId: user.userId._id,
+                    name: user.userId.name,
+                    image: user.userId.image,
+                    updateAt: user.userId.updateAt,
+                    active: user.active,
+                    status: user.status,
+                })
             });
             res.status(200);
             return res.json({
